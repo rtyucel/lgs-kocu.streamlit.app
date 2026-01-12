@@ -49,13 +49,31 @@ def istatistik_getir(isim):
         sh = get_sheet()
         records = sh.get_all_records()
         
-        kisisel_veri = {}
-        # Sadece giriş yapan ismin verilerini süz
+        # Veri Yapısı: { 'MATEMATİK': {'Üslü': 3, 'Kareköklü': 1}, 'FEN': {...} }
+        ders_bazli_veri = {}
+        
         for row in records:
-            if row['İsim'] == isim: # Excel başlığın 'İsim' olmalı
-                kisisel_veri[row['Konu']] = row['Hata_Sayisi']
-        return kisisel_veri
+            if row['İsim'] == isim:
+                tam_konu = row['Konu'] # Örn: "MATEMATİK : Üslü İfadeler"
+                hata = row['Hata_Sayisi']
+                
+                # Eğer formatımız uygunsa (İçinde : varsa) parçala
+                if " : " in tam_konu:
+                    ders, konu = tam_konu.split(" : ")
+                else:
+                    # Format bozuksa veya eski veri varsa 'Genel' altına at
+                    ders = "DİĞER"
+                    konu = tam_konu
+                
+                # Sözlüğe ekle
+                if ders not in ders_bazli_veri:
+                    ders_bazli_veri[ders] = {}
+                
+                ders_bazli_veri[ders][konu] = hata
+                
+        return ders_bazli_veri
     except Exception as e:
+        st.error(f"Veri hatası: {e}")
         return {}
 
 # --- MÜFREDAT YÜKLEME ---
@@ -120,15 +138,47 @@ with tab1:
             st.session_state['onay'] = False
 
 with tab2:
-    st.subheader(f"{kullanici_adi} - Hata İstatistiği")
-    veriler = istatistik_getir(kullanici_adi)
+    st.subheader(f"📊 {kullanici_adi} - Performans Karnesi")
     
-    if veriler:
-        st.bar_chart(veriler)
+    # Verileri getir
+    tum_veriler = istatistik_getir(kullanici_adi)
+    
+    if tum_veriler:
+        # 1. Adım: Hangi dersi görmek istiyorsun?
+        dersler = list(tum_veriler.keys())
+        secilen_ders = st.selectbox("İncelemek İstediğin Dersi Seç:", dersler)
         
-        # Basit öneri sistemi
-        en_cok_hata = max(veriler, key=veriler.get)
-        if veriler[en_cok_hata] >= 3:
-            st.warning(f"⚠️ '{en_cok_hata}' konusunda {veriler[en_cok_hata]} yanlışın var. Konu tekrarı yapmalısın!")
+        # 2. Adım: O dersin verilerini al ve çiz
+        ders_verisi = tum_veriler[secilen_ders]
+        
+        st.write(f"**{secilen_ders}** dersindeki hata dağılımın:")
+        st.bar_chart(ders_verisi)
+        
+        # 3. Adım: O ders için özel uyarılar
+        # En çok hata yapılan konuyu bul
+        en_cok_hata_konusu = max(ders_verisi, key=ders_verisi.get)
+        hata_sayisi = ders_verisi[en_cok_hata_konusu]
+        
+        if hata_sayisi >= 3:
+            st.error(f"⚠️ DİKKAT: **{secilen_ders}** dersinde **'{en_cok_hata_konusu}'** konusunda {hata_sayisi} yanlışın birikmiş.")
+            
+            # Video linkini bulma mantığı (JSON'dan)
+            video_url = None
+            # Ders adını JSON formatına uydur (MATEMATİK -> matematik_8)
+            json_ders_key = secilen_ders.lower() + "_8" 
+            # (Türkçe karakter sorunu olabilir, basit bir eşleştirme döngüsü daha güvenli olur ama şimdilik böyle deneyelim)
+            
+            # Basit arama
+            for d_key, konular in mufredat.items():
+                if secilen_ders in d_key.upper(): # JSON'da matematik_8, bizde MATEMATİK
+                    for k in konular:
+                        if k['konu'] == en_cok_hata_konusu:
+                            video_url = k['video_link']
+            
+            if video_url:
+                st.markdown(f"👉 **[Eksiklerini Kapatmak İçin Bu Dersi İzle]({video_url})**")
+            else:
+                st.info(f"Bu konu için YouTube'da '{en_cok_hata_konusu}' araması yapmanı öneririm.")
+                
     else:
-        st.write("Henüz kaydedilmiş bir verin yok.")
+        st.info("Henüz hata kaydı bulunamadı. Soru çözmeye devam! 💪")
