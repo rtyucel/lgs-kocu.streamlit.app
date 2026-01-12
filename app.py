@@ -5,132 +5,130 @@ import json
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
-# --- 1. AYARLAR & BAĞLANTILAR ---
-
-# API Key'i Secrets'tan al
+# --- AYARLAR ---
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
-
-# Sayfa ayarları
 st.set_page_config(page_title="LGS Akıllı Koç", page_icon="🎓")
 
-# Google Sheets Bağlantısı
-def get_google_sheet():
-    # Secrets'tan bilgileri alıp bir sözlük (dictionary) oluşturuyoruz
+# --- SHEET FONKSİYONLARI ---
+def get_sheet():
     creds_dict = dict(st.secrets["service_account"])
-    
-    # Bağlantıyı kur
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
     creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
     client = gspread.authorize(creds)
-    
-    # Dosyanı aç (Buraya kendi oluşturduğun Sheet adını tam olarak yaz)
-    sheet = client.open("LGS_Takip_Sistemi").sheet1
-    return sheet
+    return client.open("LGS_Takip_Sistemi").sheet1
 
-# Veri Okuma Fonksiyonu (Sheets'ten)
-def veri_getir():
+def hata_ekle(isim, konu):
     try:
-        sheet = get_google_sheet()
-        # Tüm kayıtları al
-        records = sheet.get_all_records()
-        # { 'Konu': HataSayisi } formatına çevir
-        data = {}
-        for row in records:
-            data[row['Konu']] = row['Hata_Sayisi']
-        return data
-    except Exception as e:
-        st.error(f"Veri okunurken hata: {e}")
-        return {}
-
-# Veri Kaydetme Fonksiyonu (Sheets'e)
-def veri_guncelle(konu):
-    try:
-        sheet = get_google_sheet()
-        # Konu zaten var mı ara?
-        cell = sheet.find(konu)
+        sh = get_sheet()
+        data = sh.get_all_values() # Tüm tabloyu çek
         
-        if cell:
-            # Varsa yanındaki hücreyi (Hata Sayısı) al ve 1 artır
-            current_val = int(sheet.cell(cell.row, cell.col + 1).value)
-            sheet.update_cell(cell.row, cell.col + 1, current_val + 1)
+        # Öğrencinin bu konuda daha önce hatası var mı bulmaya çalış
+        satir_no = 0
+        mevcut_hata = 0
+        
+        # Tabloyu tarıyoruz (Başlık satırını atla)
+        for i, row in enumerate(data[1:], start=2):
+            # Eğer İSİM ve KONU eşleşiyorsa
+            if row[0] == isim and row[1] == konu:
+                satir_no = i
+                mevcut_hata = int(row[2])
+                break
+        
+        if satir_no > 0:
+            # Varsa güncelle
+            sh.update_cell(satir_no, 3, mevcut_hata + 1)
         else:
-            # Yoksa en alta yeni satır ekle
-            sheet.append_row([konu, 1])
+            # Yoksa yeni satır ekle
+            sh.append_row([isim, konu, 1])
             
     except Exception as e:
         st.error(f"Kayıt hatası: {e}")
 
-# Müfredat dosyasını yükle
+def istatistik_getir(isim):
+    try:
+        sh = get_sheet()
+        records = sh.get_all_records()
+        
+        kisisel_veri = {}
+        # Sadece giriş yapan ismin verilerini süz
+        for row in records:
+            if row['İsim'] == isim: # Excel başlığın 'İsim' olmalı
+                kisisel_veri[row['Konu']] = row['Hata_Sayisi']
+        return kisisel_veri
+    except Exception as e:
+        return {}
+
+# --- MÜFREDAT YÜKLEME ---
 try:
     with open('mufredat.json', 'r', encoding='utf-8') as f:
         mufredat = json.load(f)
-except FileNotFoundError:
-    st.error("mufredat.json bulunamadı.")
+except:
     st.stop()
 
-# --- 2. YAPAY ZEKA ---
+# --- AI ANALİZ ---
 def analiz_et(image):
-    model = genai.GenerativeModel('gemini-3-flash-preview') # Yeni modelin
-    
+    model = genai.GenerativeModel('gemini-3-flash-preview')
     konu_havuzu = []
-    for ders_kodu, konular in mufredat.items():
-        ders_adi = ders_kodu.replace("_8", "").upper()
+    for ders, konular in mufredat.items():
+        d_adi = ders.replace("_8", "").upper()
         for k in konular:
-            konu_havuzu.append(f"{ders_adi} : {k['konu']}")
+            konu_havuzu.append(f"{d_adi} : {k['konu']}")
             
-    prompt = f"""
-    Sen LGS öğretmenisin. Görseli analiz et.
-    Ders ve Konuyu tespit et.
-    Referans Listesi: {konu_havuzu}
-    Cevap Formatı: SONUC: [Seçim]
-    """
-    
-    with st.spinner('Analiz ediliyor...'):
-        response = model.generate_content([prompt, image])
-        return response.text.replace("SONUC: ", "").strip()
+    prompt = f"Görseldeki LGS sorusunun dersini ve konusunu bul. Liste: {konu_havuzu}. Sadece formatı yaz: SONUC: [Seçim]"
+    response = model.generate_content([prompt, image])
+    return response.text.replace("SONUC: ", "").strip()
 
-# --- 3. ARAYÜZ ---
+# --- ARAYÜZ ---
 st.title("🎓 LGS Bulut Koçu")
-st.caption("Verileriniz Google Sheets üzerinde saklanmaktadır.")
 
-tab1, tab2 = st.tabs(["📸 Fotoğraf Çek", "📊 İstatistiklerim"])
+# YAN MENÜ: GİRİŞ EKRANI
+with st.sidebar:
+    st.header("Öğrenci Girişi")
+    kullanici_adi = st.text_input("Adın Soyadın:", placeholder="Örn: Ali Yılmaz")
+    
+    if kullanici_adi:
+        st.success(f"Hoş geldin, {kullanici_adi} 👋")
+    else:
+        st.warning("Lütfen işlem yapmak için adını gir.")
+        st.stop() # Ad girilmezse uygulama burada durur
+
+# ANA EKRAN
+tab1, tab2 = st.tabs(["📸 Soru Yükle", "📊 Karnem"])
 
 with tab1:
-    img_file = st.camera_input("Soru Çek")
-    # (Galeriden yükleme kısmını sadeleştirdim, istersen ekleyebilirsin)
-    
-    if img_file:
-        image = Image.open(img_file)
-        st.image(image, width=300)
-        
-        if st.button("🚀 Analiz Et", type="primary"):
-            tespit = analiz_et(image)
-            st.session_state['son_tespit'] = tespit
-            st.session_state['analiz_yapildi'] = True
+    img = st.camera_input("Fotoğraf Çek")
+    if img:
+        st.image(img, width=300)
+        if st.button("Analiz Et"):
+            tespit = analiz_et(Image.open(img))
+            st.session_state['tespit'] = tespit
+            st.session_state['onay'] = True
 
-    if 'analiz_yapildi' in st.session_state and st.session_state['analiz_yapildi']:
-        tespit = st.session_state['son_tespit']
-        st.divider()
-        st.success(f"📌 Tespit: **{tespit}**")
+    if st.session_state.get('onay'):
+        tespit = st.session_state['tespit']
+        st.info(f"Konu: **{tespit}**")
         
-        col1, col2 = st.columns(2)
-        if col1.button("✅ Doğru"):
+        c1, c2 = st.columns(2)
+        if c1.button("✅ Doğru"):
             st.balloons()
-            st.session_state['analiz_yapildi'] = False
+            st.session_state['onay'] = False
             
-        if col2.button("❌ Yanlış"):
-            with st.spinner("Veritabanına işleniyor..."):
-                veri_guncelle(tespit) # Sheets'e yazıyor
-            st.warning("Hata kaydedildi.")
-            
-            # Güncel hatayı okuyup video önerme mantığı buraya eklenebilir
-            st.session_state['analiz_yapildi'] = False
+        if c2.button("❌ Yanlış"):
+            with st.spinner("Kaydediliyor..."):
+                hata_ekle(kullanici_adi, tespit) # İsimle beraber kaydet
+            st.success("Hata hanene işlendi.")
+            st.session_state['onay'] = False
 
 with tab2:
-    st.subheader("Hata Karnesi")
-    if st.button("Verileri Yenile"):
-        veriler = veri_getir()
-        if veriler:
-            st.bar_chart(veriler)
-        else:
-            st.info("Henüz hata kaydı yok.")
+    st.subheader(f"{kullanici_adi} - Hata İstatistiği")
+    veriler = istatistik_getir(kullanici_adi)
+    
+    if veriler:
+        st.bar_chart(veriler)
+        
+        # Basit öneri sistemi
+        en_cok_hata = max(veriler, key=veriler.get)
+        if veriler[en_cok_hata] >= 3:
+            st.warning(f"⚠️ '{en_cok_hata}' konusunda {veriler[en_cok_hata]} yanlışın var. Konu tekrarı yapmalısın!")
+    else:
+        st.write("Henüz kaydedilmiş bir verin yok.")
