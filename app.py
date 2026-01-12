@@ -6,9 +6,9 @@ import os
 
 # --- 1. AYARLAR ---
 # Google AI Studio'dan aldığın API Key'i buraya tırnak içine yapıştır
-GOOGLE_API_KEY = "AIzaSyA3-i2ZL1gwVHhTE5qm2hbSimJyuWOx134"
+genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 
-genai.configure(api_key=GOOGLE_API_KEY)
+
 
 # Sayfa ayarları
 st.set_page_config(page_title="LGS Akıllı Koç", page_icon="🎓")
