@@ -1,0 +1,314 @@
+{
+  "turkce_8": [
+    {
+      "id": "tr_8_01",
+      "konu": "Sözcükte Anlam",
+      "detay": "Gerçek, mecaz, terim anlam, eş ve zıt anlamlı kelimeler.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+sözcükte+anlam"
+    },
+    {
+      "id": "tr_8_02",
+      "konu": "Cümlede Anlam",
+      "detay": "Neden-sonuç, amaç-sonuç, koşul, öznel-nesnel yargılar.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+cümlede+anlam"
+    },
+    {
+      "id": "tr_8_03",
+      "konu": "Paragrafta Anlam",
+      "detay": "Ana düşünce, yardımcı düşünceler, paragraf yapısı.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+paragraf+taktikleri"
+    },
+    {
+      "id": "tr_8_04",
+      "konu": "Sözel Mantık ve Muhakeme",
+      "detay": "Tablo ve grafik yorumlama, mantıksal çıkarım.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+sözel+mantık"
+    },
+    {
+      "id": "tr_8_05",
+      "konu": "Fiilimsiler",
+      "detay": "İsim-fiil, sıfat-fiil, zarf-fiil ekleri.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+fiilimsiler"
+    },
+    {
+      "id": "tr_8_06",
+      "konu": "Cümlenin Ögeleri",
+      "detay": "Yüklem, özne, nesne, tamlayıcılar ve vurgu.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+cümlenin+ögeleri"
+    },
+    {
+      "id": "tr_8_07",
+      "konu": "Fiilde Çatı",
+      "detay": "Etken-edilgen, geçişli-geçişsiz çatılar.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+fiilde+çatı"
+    },
+    {
+      "id": "tr_8_08",
+      "konu": "Cümle Türleri",
+      "detay": "Yüklemine, öge dizilişine ve yapısına göre cümleler.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+cümle+türleri"
+    },
+    {
+      "id": "tr_8_09",
+      "konu": "Yazım ve Noktalama",
+      "detay": "Yazım kuralları ve noktalama işaretleri.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+yazım+ve+noktalama"
+    },
+    {
+      "id": "tr_8_10",
+      "konu": "Metin Türleri ve Söz Sanatları",
+      "detay": "Yazı türleri ve edebi sanatlar.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+metin+türleri"
+    }
+  ],
+  "matematik_8": [
+    {
+      "id": "mat_8_01",
+      "konu": "Çarpanlar ve Katlar",
+      "detay": "EBOB, EKOK, asal çarpanlar.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+çarpanlar+ve+katlar"
+    },
+    {
+      "id": "mat_8_02",
+      "konu": "Üslü İfadeler",
+      "detay": "Üslü sayılar, bilimsel gösterim.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+üslü+ifadeler"
+    },
+    {
+      "id": "mat_8_03",
+      "konu": "Kareköklü İfadeler",
+      "detay": "Kök dışına çıkarma, köklü işlemler.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+kareköklü+ifadeler"
+    },
+    {
+      "id": "mat_8_04",
+      "konu": "Veri Analizi",
+      "detay": "Grafik türleri ve yorumlama.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+veri+analizi"
+    },
+    {
+      "id": "mat_8_05",
+      "konu": "Basit Olayların Olma Olasılığı",
+      "detay": "Olasılık hesaplama.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+olasılık"
+    },
+    {
+      "id": "mat_8_06",
+      "konu": "Cebirsel İfadeler ve Özdeşlikler",
+      "detay": "Özdeşlikler ve çarpanlara ayırma.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+cebirsel+ifadeler"
+    },
+    {
+      "id": "mat_8_07",
+      "konu": "Doğrusal Denklemler",
+      "detay": "Denklem çözme, eğim, koordinat sistemi.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+doğrusal+denklemler"
+    },
+    {
+      "id": "mat_8_08",
+      "konu": "Eşitsizlikler",
+      "detay": "Eşitsizliklerin sayı doğrusunda gösterimi.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+eşitsizlikler"
+    },
+    {
+      "id": "mat_8_09",
+      "konu": "Üçgenler",
+      "detay": "Üçgen eşitsizliği, pisagor, benzerlik.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+üçgenler"
+    },
+    {
+      "id": "mat_8_10",
+      "konu": "Dönüşüm Geometrisi",
+      "detay": "Öteleme, yansıma.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+dönüşüm+geometrisi"
+    },
+    {
+      "id": "mat_8_11",
+      "konu": "Geometrik Cisimler",
+      "detay": "Prizma, silindir, koni, piramit hacim ve alan.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+geometrik+cisimler"
+    }
+  ],
+  "fen_8": [
+    {
+      "id": "fen_8_01",
+      "konu": "Mevsimler ve İklim",
+      "detay": "Mevsimlerin oluşumu, iklim hareketleri.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+mevsimler+ve+iklim"
+    },
+    {
+      "id": "fen_8_02",
+      "konu": "DNA ve Genetik Kod",
+      "detay": "Kalıtım, mutasyon, modifikasyon, biyoteknoloji.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+dna+ve+genetik+kod"
+    },
+    {
+      "id": "fen_8_03",
+      "konu": "Basınç",
+      "detay": "Katı, sıvı ve gaz basıncı.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+basınç"
+    },
+    {
+      "id": "fen_8_04",
+      "konu": "Madde ve Endüstri",
+      "detay": "Periyodik tablo, asit-baz, ısı değişimi.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+madde+ve+endüstri"
+    },
+    {
+      "id": "fen_8_05",
+      "konu": "Basit Makineler",
+      "detay": "Makaralar, kaldıraçlar, eğik düzlem.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+basit+makineler"
+    },
+    {
+      "id": "fen_8_06",
+      "konu": "Enerji Dönüşümleri",
+      "detay": "Fotosentez, solunum, madde döngüleri.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+enerji+dönüşümleri"
+    },
+    {
+      "id": "fen_8_07",
+      "konu": "Elektrik Yükleri",
+      "detay": "Elektriklenme, elektroskop.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+elektrik+yükleri"
+    }
+  ],
+  "inkilap_8": [
+    {
+      "id": "ink_8_01",
+      "konu": "Bir Kahraman Doğuyor",
+      "detay": "Mustafa Kemal'in hayatı.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+bir+kahraman+doğuyor"
+    },
+    {
+      "id": "ink_8_02",
+      "konu": "Milli Uyanış",
+      "detay": "TBMM, Kongreler, Misak-ı Milli.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+milli+uyanış"
+    },
+    {
+      "id": "ink_8_03",
+      "konu": "Ya İstiklal Ya Ölüm",
+      "detay": "Cepheler ve savaşlar.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+ya+istiklal+ya+ölüm"
+    },
+    {
+      "id": "ink_8_04",
+      "konu": "Atatürkçülük ve Çağdaşlaşan Türkiye",
+      "detay": "İlke ve inkılaplar.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+atatürkçülük"
+    },
+    {
+      "id": "ink_8_05",
+      "konu": "Demokratikleşme Çabaları",
+      "detay": "Çok partili hayat denemeleri.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+demokratikleşme+çabaları"
+    },
+    {
+      "id": "ink_8_06",
+      "konu": "Dış Politika",
+      "detay": "Atatürk dönemi dış politika.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+dış+politika"
+    },
+    {
+      "id": "ink_8_07",
+      "konu": "Atatürk'ün Ölümü ve Sonrası",
+      "detay": "10 Kasım ve yankıları.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+atatürkün+ölümü"
+    }
+  ],
+  "din_8": [
+    {
+      "id": "din_8_01",
+      "konu": "Kader İnancı",
+      "detay": "Kaza, kader, tevekkül.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+kader+inancı"
+    },
+    {
+      "id": "din_8_02",
+      "konu": "Zekat ve Sadaka",
+      "detay": "İnfak, zekat, sadaka.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+zekat+ve+sadaka"
+    },
+    {
+      "id": "din_8_03",
+      "konu": "Din ve Hayat",
+      "detay": "Dinin korunması gereken 5 temel esası.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+din+ve+hayat"
+    },
+    {
+      "id": "din_8_04",
+      "konu": "Hz. Muhammed'in Örnekliği",
+      "detay": "Peygamberin güzel ahlakı.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+hz+muhammedin+örnekliği"
+    },
+    {
+      "id": "din_8_05",
+      "konu": "Kur'an-ı Kerim",
+      "detay": "Kur'an'ın temel özellikleri.",
+      "video_link": "https://www.youtube.com/results?search_query=8+sınıf+kuranı+kerim+ve+özellikleri"
+    }
+  ],
+  "ingilizce_8": [
+    {
+      "id": "ing_8_01",
+      "konu": "Unit 1: Friendship",
+      "detay": "Invitations, personal traits.",
+      "video_link": "https://www.youtube.com/results?search_query=8+grade+friendship"
+    },
+    {
+      "id": "ing_8_02",
+      "konu": "Unit 2: Teen Life",
+      "detay": "Daily routines, music.",
+      "video_link": "https://www.youtube.com/results?search_query=8+grade+teen+life"
+    },
+    {
+      "id": "ing_8_03",
+      "konu": "Unit 3: In The Kitchen",
+      "detay": "Recipes, cooking.",
+      "video_link": "https://www.youtube.com/results?search_query=8+grade+in+the+kitchen"
+    },
+    {
+      "id": "ing_8_04",
+      "konu": "Unit 4: On The Phone",
+      "detay": "Communication, phone calls.",
+      "video_link": "https://www.youtube.com/results?search_query=8+grade+on+the+phone"
+    },
+    {
+      "id": "ing_8_05",
+      "konu": "Unit 5: The Internet",
+      "detay": "Online safety, habits.",
+      "video_link": "https://www.youtube.com/results?search_query=8+grade+the+internet"
+    },
+    {
+      "id": "ing_8_06",
+      "konu": "Unit 6: Adventures",
+      "detay": "Extreme sports.",
+      "video_link": "https://www.youtube.com/results?search_query=8+grade+adventures"
+    },
+    {
+      "id": "ing_8_07",
+      "konu": "Unit 7: Tourism",
+      "detay": "Travel, places.",
+      "video_link": "https://www.youtube.com/results?search_query=8+grade+tourism"
+    },
+    {
+      "id": "ing_8_08",
+      "konu": "Unit 8: Chores",
+      "detay": "Household duties.",
+      "video_link": "https://www.youtube.com/results?search_query=8+grade+chores"
+    },
+    {
+      "id": "ing_8_09",
+      "konu": "Unit 9: Science",
+      "detay": "Scientific achievements.",
+      "video_link": "https://www.youtube.com/results?search_query=8+grade+science"
+    },
+    {
+      "id": "ing_8_10",
+      "konu": "Unit 10: Natural Forces",
+      "detay": "Disasters, environment.",
+      "video_link": "https://www.youtube.com/results?search_query=8+grade+natural+forces"
+    }
+  ]
+}
