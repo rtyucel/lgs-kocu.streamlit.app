@@ -4,12 +4,43 @@ from PIL import Image
 import json
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+import time
 
-# --- AYARLAR ---
+# --- 1. TASARIM VE AYARLAR ---
+st.set_page_config(
+    page_title="LGS Pro",
+    page_icon="🚀",
+    layout="centered", # Mobilde daha derli toplu durur
+    initial_sidebar_state="collapsed"
+)
+
+# Özel CSS ile İstenmeyen Yazıları Gizleme ve Butonları Güzelleştirme
+st.markdown("""
+<style>
+    /* Üstteki renkli çizgiyi ve footer'ı gizle */
+    header {visibility: hidden;}
+    footer {visibility: hidden;}
+    
+    /* Butonları biraz daha geniş ve yuvarlak yap */
+    .stButton>button {
+        width: 100%;
+        border-radius: 20px;
+        height: 3em;
+        font-weight: bold;
+    }
+    
+    /* Kamera alanını çerçeve içine al */
+    .stCameraInput {
+        border: 2px solid #f0f2f6;
+        border-radius: 15px;
+        padding: 10px;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# --- 2. BAĞLANTILAR (AYNI KALDI) ---
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
-st.set_page_config(page_title="LGS Akıllı Koç", page_icon="🎓")
 
-# --- SHEET FONKSİYONLARI ---
 def get_sheet():
     creds_dict = dict(st.secrets["service_account"])
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
@@ -20,70 +51,54 @@ def get_sheet():
 def hata_ekle(isim, konu):
     try:
         sh = get_sheet()
-        data = sh.get_all_values() # Tüm tabloyu çek
-        
-        # Öğrencinin bu konuda daha önce hatası var mı bulmaya çalış
+        data = sh.get_all_values()
         satir_no = 0
         mevcut_hata = 0
-        
-        # Tabloyu tarıyoruz (Başlık satırını atla)
         for i, row in enumerate(data[1:], start=2):
-            # Eğer İSİM ve KONU eşleşiyorsa
             if row[0] == isim and row[1] == konu:
                 satir_no = i
                 mevcut_hata = int(row[2])
                 break
-        
         if satir_no > 0:
-            # Varsa güncelle
             sh.update_cell(satir_no, 3, mevcut_hata + 1)
         else:
-            # Yoksa yeni satır ekle
             sh.append_row([isim, konu, 1])
-            
     except Exception as e:
-        st.error(f"Kayıt hatası: {e}")
+        st.error(f"Hata: {e}")
 
 def istatistik_getir(isim):
     try:
         sh = get_sheet()
         records = sh.get_all_records()
-        
-        # Veri Yapısı: { 'MATEMATİK': {'Üslü': 3, 'Kareköklü': 1}, 'FEN': {...} }
         ders_bazli_veri = {}
+        toplam_hata = 0
         
         for row in records:
             if row['İsim'] == isim:
-                tam_konu = row['Konu'] # Örn: "MATEMATİK : Üslü İfadeler"
+                tam_konu = row['Konu']
                 hata = row['Hata_Sayisi']
+                toplam_hata += hata
                 
-                # Eğer formatımız uygunsa (İçinde : varsa) parçala
                 if " : " in tam_konu:
                     ders, konu = tam_konu.split(" : ")
                 else:
-                    # Format bozuksa veya eski veri varsa 'Genel' altına at
                     ders = "DİĞER"
                     konu = tam_konu
                 
-                # Sözlüğe ekle
                 if ders not in ders_bazli_veri:
                     ders_bazli_veri[ders] = {}
-                
                 ders_bazli_veri[ders][konu] = hata
                 
-        return ders_bazli_veri
-    except Exception as e:
-        st.error(f"Veri hatası: {e}")
-        return {}
+        return ders_bazli_veri, toplam_hata
+    except:
+        return {}, 0
 
-# --- MÜFREDAT YÜKLEME ---
 try:
     with open('mufredat.json', 'r', encoding='utf-8') as f:
         mufredat = json.load(f)
 except:
     st.stop()
 
-# --- AI ANALİZ ---
 def analiz_et(image):
     model = genai.GenerativeModel('gemini-3-flash-preview')
     konu_havuzu = []
@@ -91,94 +106,119 @@ def analiz_et(image):
         d_adi = ders.replace("_8", "").upper()
         for k in konular:
             konu_havuzu.append(f"{d_adi} : {k['konu']}")
-            
-    prompt = f"Görseldeki LGS sorusunun dersini ve konusunu bul. Liste: {konu_havuzu}. Sadece formatı yaz: SONUC: [Seçim]"
+    prompt = f"Görseldeki sorunun dersini/konusunu bul. Liste: {konu_havuzu}. Format: SONUC: [Seçim]"
     response = model.generate_content([prompt, image])
     return response.text.replace("SONUC: ", "").strip()
 
-# --- ARAYÜZ ---
-st.title("🎓 LGS Bulut Koçu")
+# --- 3. AKIŞ KONTROLÜ (SESSION STATE) ---
+if 'giris_yapildi' not in st.session_state:
+    st.session_state['giris_yapildi'] = False
 
-# YAN MENÜ: GİRİŞ EKRANI
-with st.sidebar:
-    st.header("Öğrenci Girişi")
-    kullanici_adi = st.text_input("Adın Soyadın:", placeholder="Örn: Ali Yılmaz")
-    
-    if kullanici_adi:
-        st.success(f"Hoş geldin, {kullanici_adi} 👋")
-    else:
-        st.warning("Lütfen işlem yapmak için adını gir.")
-        st.stop() # Ad girilmezse uygulama burada durur
-
-# ANA EKRAN
-tab1, tab2 = st.tabs(["📸 Soru Yükle", "📊 Karnem"])
-
-with tab1:
-    img = st.camera_input("Fotoğraf Çek")
-    if img:
-        st.image(img, width=300)
-        if st.button("Analiz Et"):
-            tespit = analiz_et(Image.open(img))
-            st.session_state['tespit'] = tespit
-            st.session_state['onay'] = True
-
-    if st.session_state.get('onay'):
-        tespit = st.session_state['tespit']
-        st.info(f"Konu: **{tespit}**")
+# --- EKRAN 1: GİRİŞ EKRANI (Mobil Uyumlu) ---
+if not st.session_state['giris_yapildi']:
+    col1, col2, col3 = st.columns([1,2,1])
+    with col2:
+        st.image("https://cdn-icons-png.flaticon.com/512/3429/3429149.png", width=100) # Logo
+        st.markdown("<h2 style='text-align: center;'>LGS Koçum</h2>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center; color: gray;'>Seni tanımamız için ismini gir</p>", unsafe_allow_html=True)
         
-        c1, c2 = st.columns(2)
-        if c1.button("✅ Doğru"):
-            st.balloons()
-            st.session_state['onay'] = False
-            
-        if c2.button("❌ Yanlış"):
-            with st.spinner("Kaydediliyor..."):
-                hata_ekle(kullanici_adi, tespit) # İsimle beraber kaydet
-            st.success("Hata hanene işlendi.")
-            st.session_state['onay'] = False
-
-with tab2:
-    st.subheader(f"📊 {kullanici_adi} - Performans Karnesi")
-    
-    # Verileri getir
-    tum_veriler = istatistik_getir(kullanici_adi)
-    
-    if tum_veriler:
-        # 1. Adım: Hangi dersi görmek istiyorsun?
-        dersler = list(tum_veriler.keys())
-        secilen_ders = st.selectbox("İncelemek İstediğin Dersi Seç:", dersler)
+        isim_giris = st.text_input("Adın Soyadın", label_visibility="collapsed", placeholder="Örn: Ali Yılmaz")
         
-        # 2. Adım: O dersin verilerini al ve çiz
-        ders_verisi = tum_veriler[secilen_ders]
-        
-        st.write(f"**{secilen_ders}** dersindeki hata dağılımın:")
-        st.bar_chart(ders_verisi)
-        
-        # 3. Adım: O ders için özel uyarılar
-        # En çok hata yapılan konuyu bul
-        en_cok_hata_konusu = max(ders_verisi, key=ders_verisi.get)
-        hata_sayisi = ders_verisi[en_cok_hata_konusu]
-        
-        if hata_sayisi >= 3:
-            st.error(f"⚠️ DİKKAT: **{secilen_ders}** dersinde **'{en_cok_hata_konusu}'** konusunda {hata_sayisi} yanlışın birikmiş.")
-            
-            # Video linkini bulma mantığı (JSON'dan)
-            video_url = None
-            # Ders adını JSON formatına uydur (MATEMATİK -> matematik_8)
-            json_ders_key = secilen_ders.lower() + "_8" 
-            # (Türkçe karakter sorunu olabilir, basit bir eşleştirme döngüsü daha güvenli olur ama şimdilik böyle deneyelim)
-            
-            # Basit arama
-            for d_key, konular in mufredat.items():
-                if secilen_ders in d_key.upper(): # JSON'da matematik_8, bizde MATEMATİK
-                    for k in konular:
-                        if k['konu'] == en_cok_hata_konusu:
-                            video_url = k['video_link']
-            
-            if video_url:
-                st.markdown(f"👉 **[Eksiklerini Kapatmak İçin Bu Dersi İzle]({video_url})**")
+        if st.button("🚀 Başla"):
+            if isim_giris:
+                st.session_state['kullanici_adi'] = isim_giris.title()
+                st.session_state['giris_yapildi'] = True
+                st.rerun() # Sayfayı yenile ve ana ekrana geç
             else:
-                st.info(f"Bu konu için YouTube'da '{en_cok_hata_konusu}' araması yapmanı öneririm.")
+                st.toast("Lütfen ismini yaz!", icon="⚠️")
+
+# --- EKRAN 2: ANA UYGULAMA ---
+else:
+    kullanici = st.session_state['kullanici_adi']
+    
+    # Üst Bar (Çıkış Yap butonu ile)
+    c1, c2 = st.columns([3, 1])
+    c1.subheader(f"👋 Selam, {kullanici.split()[0]}")
+    if c2.button("Çıkış"):
+        st.session_state['giris_yapildi'] = False
+        st.rerun()
+
+    # Sekmeler (Daha modern ikonlu)
+    tab1, tab2 = st.tabs(["📸 Soru Çöz", "📊 Analiz"])
+
+    # --- TAB 1: KAMERA ALANI ---
+    with tab1:
+        st.info("Sadece soruyu görecek şekilde fotoğrafı çek.")
+        
+        # Kamera input (Tam genişlikte olacak)
+        img = st.camera_input("Kamera", label_visibility="collapsed")
+        
+        if img:
+            # Resmi göster (Biraz küçültülmüş ve ortalanmış)
+            st.image(img, caption="Çekilen Soru", use_column_width=True)
+            
+            if st.button("✨ Yapay Zekaya Sor", type="primary"):
+                with st.spinner("Soru taranıyor..."):
+                    tespit = analiz_et(Image.open(img))
+                    st.session_state['tespit'] = tespit
+                    st.session_state['onay_bekliyor'] = True
+            
+            # Analiz Sonucu Kartı
+            if st.session_state.get('onay_bekliyor'):
+                st.markdown("---")
+                st.markdown(f"""
+                <div style="background-color: #f0f8ff; padding: 15px; border-radius: 10px; border-left: 5px solid #007bff;">
+                    <h4 style="margin:0; color: #007bff;">Tespit Edilen Konu:</h4>
+                    <p style="font-size: 18px; font-weight: bold; margin:0;">{st.session_state['tespit']}</p>
+                </div>
+                <br>
+                """, unsafe_allow_html=True)
                 
-    else:
-        st.info("Henüz hata kaydı bulunamadı. Soru çözmeye devam! 💪")
+                col_a, col_b = st.columns(2)
+                if col_a.button("✅ Doğru"):
+                    st.toast("Harika! Doğru cevap.", icon="🎉")
+                    st.balloons()
+                    st.session_state['onay_bekliyor'] = False
+                    time.sleep(1)
+                    st.rerun() # Kamerayı sıfırla
+                    
+                if col_b.button("❌ Yanlış"):
+                    hata_ekle(kullanici, st.session_state['tespit'])
+                    st.toast("Kaydedildi. Konu tekrarı yap!", icon="📝")
+                    st.session_state['onay_bekliyor'] = False
+                    time.sleep(1)
+                    st.rerun()
+
+    # --- TAB 2: İSTATİSTİK ALANI ---
+    with tab2:
+        veriler, toplam_hata = istatistik_getir(kullanici)
+        
+        if veriler:
+            # Dashboard Görünümü (Metricler)
+            m1, m2 = st.columns(2)
+            m1.metric("Toplam Hata", f"{toplam_hata}", delta_color="inverse")
+            m2.metric("Ders Sayısı", f"{len(veriler)}")
+            
+            st.divider()
+            
+            ders_secim = st.pills("Ders Seç", list(veriler.keys()), selection_mode="single")
+            
+            if ders_secim:
+                st.subheader(f"{ders_secim} Analizi")
+                st.bar_chart(veriler[ders_secim])
+                
+                # Video Önerisi
+                secili_ders_verisi = veriler[ders_secim]
+                en_kotu_konu = max(secili_ders_verisi, key=secili_ders_verisi.get)
+                
+                if secili_ders_verisi[en_kotu_konu] >= 3:
+                    with st.expander(f"⚠️ {en_kotu_konu} - Tavsiye Var!", expanded=True):
+                        st.write(f"Bu konuda **{secili_ders_verisi[en_kotu_konu]} yanlışın** var.")
+                        st.markdown(f"[👉 YouTube Dersi İzle](https://www.youtube.com/results?search_query=8.sinif+{en_kotu_konu.replace(' ', '+')})")
+            else:
+                st.info("Detaylı grafik görmek için yukarıdan bir ders seç.")
+                
+        else:
+            st.image("https://cdn-icons-png.flaticon.com/512/7486/7486744.png", width=100)
+            st.markdown("<h3 style='text-align: center;'>Veri Yok</h3>", unsafe_allow_html=True)
+            st.info("Henüz hiç yanlış yapmadın veya sisteme giriş yapmadın. Soru çözmeye başla!")
